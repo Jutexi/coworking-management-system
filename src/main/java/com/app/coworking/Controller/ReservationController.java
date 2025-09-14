@@ -2,6 +2,7 @@ package com.app.coworking.Controller;
 
 import com.app.coworking.model.Reservation;
 import com.app.coworking.service.ReservationService;
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -17,26 +18,28 @@ public class ReservationController {
 
     private final ReservationService reservationService;
 
-    // Получение всех бронирований
+    @Operation(summary = "Получить все бронирования", description = "Возвращает список всех бронирований")
     @GetMapping
-    public List<Reservation> getAll() {
-        return reservationService.getAllReservations();
+    public ResponseEntity<List<Reservation>> getAll() {
+        List<Reservation> reservations = reservationService.getAllReservations();
+        return ResponseEntity.ok(reservations);
     }
 
-    // Получение бронирования по id
+    @Operation(summary = "Получить бронирование по ID", description = "Возвращает бронирование по его уникальному идентификатору")
     @GetMapping("/{id}")
-    public Reservation getById(@PathVariable Long id) {
-        return reservationService.getReservationById(id);
+    public ResponseEntity<Reservation> getById(@PathVariable Long id) {
+        Reservation reservation = reservationService.getReservationById(id);
+        return ResponseEntity.ok(reservation);
     }
 
-    // Получение бронирований конкретного пользователя
+    @Operation(summary = "Получить бронирования пользователя", description = "Возвращает список бронирований конкретного пользователя по userId")
     @GetMapping("/by-user/{userId}")
-    public List<Reservation> getByUser(@PathVariable Long userId) {
-        return reservationService.getReservationsByUser(userId);
+    public ResponseEntity<List<Reservation>> getByUser(@PathVariable Long userId) {
+        List<Reservation> reservations = reservationService.getReservationsByUser(userId);
+        return ResponseEntity.ok(reservations);
     }
 
-
-    // Создание бронирования: нужно указать workspaceId и userId
+    @Operation(summary = "Создать бронирование", description = "Создает новое бронирование для указанного workspace и пользователя")
     @PostMapping("/workspace/{workspaceId}/user/{userId}")
     public ResponseEntity<Reservation> create(@PathVariable Long workspaceId,
                                               @PathVariable Long userId,
@@ -45,17 +48,18 @@ public class ReservationController {
         return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
 
-    // Обновление бронирования
+    @Operation(summary = "Обновить бронирование", description = "Обновляет данные бронирования по его ID")
     @PutMapping("/{id}")
-    public Reservation update(@PathVariable Long id,
-                              @Valid @RequestBody Reservation reservation) {
-        return reservationService.updateReservation(id, reservation);
+    public ResponseEntity<Reservation> update(@PathVariable Long id,
+                                              @Valid @RequestBody Reservation reservation) {
+        Reservation updated = reservationService.updateReservation(id, reservation);
+        return ResponseEntity.ok(updated);
     }
 
-    // Удаление бронирования
+    @Operation(summary = "Удалить бронирование", description = "Удаляет бронирование по его ID")
     @DeleteMapping("/{id}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void delete(@PathVariable Long id) {
+    public ResponseEntity<Void> delete(@PathVariable Long id) {
         reservationService.deleteReservation(id);
+        return ResponseEntity.noContent().build(); // статус 204 No Content
     }
 }

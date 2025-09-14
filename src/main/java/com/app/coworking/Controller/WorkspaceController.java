@@ -3,6 +3,7 @@ package com.app.coworking.Controller;
 
 import com.app.coworking.model.Workspace;
 import com.app.coworking.service.WorkspaceService;
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -19,19 +20,21 @@ public class WorkspaceController {
 
     private final WorkspaceService workspaceService;
 
-    // Получение всех рабочих мест
+    @Operation(summary = "Получить все рабочие места", description = "Возвращает список всех рабочих мест")
     @GetMapping
-    public List<Workspace> getAll() {
-        return workspaceService.getAllWorkspaces();
+    public ResponseEntity<List<Workspace>> getAll() {
+        List<Workspace> workspaces = workspaceService.getAllWorkspaces();
+        return ResponseEntity.ok(workspaces);
     }
 
-    // Получение рабочего места по id
+    @Operation(summary = "Получить рабочее место по ID", description = "Возвращает рабочее место по его уникальному идентификатору")
     @GetMapping("/{id}")
-    public Workspace getById(@PathVariable Long id) {
-        return workspaceService.getWorkspaceById(id);
+    public ResponseEntity<Workspace> getById(@PathVariable Long id) {
+        Workspace workspace = workspaceService.getWorkspaceById(id);
+        return ResponseEntity.ok(workspace);
     }
 
-    // Создание рабочего места в коворкинге (coworkingId указываем в URL)
+    @Operation(summary = "Создать рабочее место в коворкинге", description = "Создает новое рабочее место в указанном коворкинге")
     @PostMapping("/coworking/{coworkingId}")
     public ResponseEntity<Workspace> create(@PathVariable Long coworkingId,
                                             @Valid @RequestBody Workspace workspace) {
@@ -39,17 +42,18 @@ public class WorkspaceController {
         return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
 
-    // Обновление рабочего места
+    @Operation(summary = "Обновить рабочее место", description = "Обновляет данные рабочего места по его ID")
     @PutMapping("/{id}")
-    public Workspace update(@PathVariable Long id,
-                            @Valid @RequestBody Workspace workspace) {
-        return workspaceService.updateWorkspace(id, workspace);
+    public ResponseEntity<Workspace> update(@PathVariable Long id,
+                                            @Valid @RequestBody Workspace workspace) {
+        Workspace updated = workspaceService.updateWorkspace(id, workspace);
+        return ResponseEntity.ok(updated);
     }
 
-    // Удаление рабочего места
+    @Operation(summary = "Удалить рабочее место", description = "Удаляет рабочее место по его ID")
     @DeleteMapping("/{id}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void delete(@PathVariable Long id) {
+    public ResponseEntity<Void> delete(@PathVariable Long id) {
         workspaceService.deleteWorkspace(id);
+        return ResponseEntity.noContent().build(); // возвращает статус 204 No Content
     }
 }

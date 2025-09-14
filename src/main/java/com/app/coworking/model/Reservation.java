@@ -1,6 +1,6 @@
 package com.app.coworking.model;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Future;
@@ -29,13 +29,13 @@ public class Reservation {
     // Связь с Workspace
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "workspace_id", nullable = false)
-    @JsonBackReference
+    @JsonIgnore
     private Workspace workspace;
 
     // Связь с User
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
-    @JsonBackReference
+    @JsonIgnore
     private User user;
 
     // Геттеры для JSON

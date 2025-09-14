@@ -2,6 +2,7 @@ package com.app.coworking.Controller;
 
 import com.app.coworking.model.User;
 import com.app.coworking.service.UserService;
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -17,30 +18,40 @@ public class UserController {
 
     private final UserService userService;
 
+    @Operation(summary = "Получить всех пользователей", description = "Возвращает список всех пользователей")
     @GetMapping
-    public List<User> getAll() {
-        return userService.getAllUsers();
+    public ResponseEntity<List<User>> getAll() {
+        List<User> users = userService.getAllUsers();
+        return ResponseEntity.ok(users);
     }
 
+    @Operation(summary = "Получить пользователя по ID", description = "Возвращает пользователя по его уникальному ID")
     @GetMapping("/{id}")
-    public User getById(@PathVariable Long id) {
-        return userService.getUserById(id);
+    public ResponseEntity<User> getById(@PathVariable Long id) {
+        User user = userService.getUserById(id);
+        return ResponseEntity.ok(user);
     }
 
+    @Operation(summary = "Создать пользователя", description = "Создает нового пользователя с указанными данными")
     @PostMapping
     public ResponseEntity<User> create(@Valid @RequestBody User user) {
         User created = userService.createUser(user);
         return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
 
+    @Operation(summary = "Обновить пользователя", description = "Обновляет данные пользователя по его ID")
     @PutMapping("/{id}")
-    public User update(@PathVariable Long id, @Valid @RequestBody User user) {
-        return userService.updateUser(id, user);
+    public ResponseEntity<User> update(@PathVariable Long id, @Valid @RequestBody User user) {
+        User updated = userService.updateUser(id, user);
+        return ResponseEntity.ok(updated);
     }
 
+    @Operation(summary = "Удалить пользователя", description = "Удаляет пользователя по его ID")
     @DeleteMapping("/{id}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void delete(@PathVariable Long id) {
+    public ResponseEntity<Void> delete(@PathVariable Long id) {
         userService.deleteUser(id);
+        return ResponseEntity.noContent().build(); // возвращает статус 204 No Content
     }
 }
+
+

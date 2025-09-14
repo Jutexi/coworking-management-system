@@ -1,6 +1,6 @@
 package com.app.coworking.model;
 
-import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -51,6 +51,6 @@ public class Coworking {
     private String description;
 
     @OneToMany(mappedBy = "coworking",fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonManagedReference
+    @JsonIgnore
     private Set<Workspace> workspaces = new HashSet<>();
 }

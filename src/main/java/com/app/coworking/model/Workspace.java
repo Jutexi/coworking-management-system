@@ -1,8 +1,7 @@
 package com.app.coworking.model;
 
 import com.app.coworking.model.enums.WorkspaceType;
-import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Min;
@@ -50,7 +49,7 @@ public class Workspace {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "coworking_id", nullable = false)
-    @JsonBackReference
+    @JsonIgnore
     private Coworking coworking;
 
     @JsonProperty("coworking_id")
@@ -59,6 +58,6 @@ public class Workspace {
     }
 
     @OneToMany(mappedBy = "workspace",fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonManagedReference
+    @JsonIgnore
     private Set<Reservation> reservations = new HashSet<>();
 }
