@@ -13,7 +13,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @RestControllerAdvice
-public class GlobalExceptionHandler {
+public class GlobalExceptionHandler { // может все же убрать отсюда логгер
 
     private final Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 

@@ -69,6 +69,11 @@ public class ReservationService {
     }
 
     @Transactional
+    public List<Reservation> createBulkReservations(List<Reservation> reservations) {
+        throw new AlreadyExistsException("Reservations bulk does not work");
+    }
+
+    @Transactional
     public void deleteReservation(Long id) {
         Reservation existing = getReservationById(id);
         reservationRepository.delete(existing);
