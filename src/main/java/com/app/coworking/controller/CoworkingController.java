@@ -1,4 +1,4 @@
-package com.app.coworking.Controller;
+package com.app.coworking.controller;
 
 import com.app.coworking.model.Coworking;
 import com.app.coworking.service.CoworkingService;
