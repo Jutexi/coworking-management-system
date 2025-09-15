@@ -35,9 +35,10 @@ public class LogController {
             @RequestParam @NotNull(message = "Date is required")
             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) throws IOException {
 
+        String filterDate = date.toString() + "T";  // 2025-09-16T
         List<String> filteredLogs = Files.readAllLines(Paths.get(logFilePath))
                 .stream()
-                .filter(line -> line.contains(date.toString()))
+                .filter(line -> line.contains(filterDate))
                 .collect(Collectors.toList());
 
         if (filteredLogs.isEmpty()) {

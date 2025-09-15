@@ -53,6 +53,13 @@ public class GlobalExceptionHandler { // может все же убрать о�
         return ResponseEntity.badRequest().body(Map.of("error", ex.getMessage()));
     }
 
+    // Новый обработчик для InvalidArgumentException
+    @ExceptionHandler(InvalidArgumentException.class)
+    public ResponseEntity<Map<String, String>> handleInvalidArgument(InvalidArgumentException ex) {
+        logger.error("Invalid argument error: {}", ex.getMessage(), ex);
+        return ResponseEntity.badRequest().body(Map.of("error", ex.getMessage()));
+    }
+
     // Общий fallback на все другие исключения
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Map<String, String>> handleAllExceptions(Exception ex) {

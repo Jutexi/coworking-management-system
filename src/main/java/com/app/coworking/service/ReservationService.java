@@ -3,6 +3,7 @@ package com.app.coworking.service;
 import com.app.coworking.cache.ReservationCache;
 import com.app.coworking.exception.AlreadyExistsException;
 import com.app.coworking.exception.ResourceNotFoundException;
+import com.app.coworking.exception.InvalidArgumentException;
 import com.app.coworking.model.Reservation;
 import com.app.coworking.model.User;
 import com.app.coworking.model.Workspace;
@@ -15,6 +16,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -66,7 +68,7 @@ public class ReservationService {
 
         // 1) конец не может быть раньше начала (end < start) — равно допустимо (one-day)
         if (end.isBefore(start)) {
-            throw new IllegalArgumentException("End date must be same or after start date");
+            throw new InvalidArgumentException("End date must be same or after start date");
         }
 
         // 2) длительность включительно (например, start==end => daysInclusive = 1)
@@ -76,14 +78,15 @@ public class ReservationService {
         if (workspace.getType() == WorkspaceType.OFFICE) {
             final int MIN_OFFICE_DAYS = 7; // <- можно изменить на 30
             if (daysInclusive < MIN_OFFICE_DAYS) {
-                throw new IllegalArgumentException("Office reservations must be at least " + MIN_OFFICE_DAYS + " days long");
+                throw new InvalidArgumentException("Office reservations must be at least " + MIN_OFFICE_DAYS + " days long");
             }
         }
 
         // 4) находим пересекающиеся бронирования
-        List<Reservation> overlapping = reservationRepository.findOverlappingReservations(
-                workspace.getId(), start, end
+        List<Reservation> overlapping = new ArrayList<>(
+                reservationRepository.findOverlappingReservations(workspace.getId(), start, end)
         );
+
 
 // при update исключаем саму бронь
         if (excludeReservationId != null) {
@@ -112,7 +115,7 @@ public class ReservationService {
 
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with id " + userId));
-        // валидация нужна
+        checkAvailability(workspace, user, reservation.getStartDate(), reservation.getEndDate(), null);
         reservation.setWorkspace(workspace);
         reservation.setUser(user);
 
@@ -125,7 +128,9 @@ public class ReservationService {
     public Reservation updateReservation(Long id, Reservation updated) {
         Reservation existing = reservationRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Reservation not found with id " + id));
-        //валидация нужна
+        Workspace workspace = existing.getWorkspace();
+        User user = existing.getUser();
+        checkAvailability(workspace, user, updated.getStartDate(), updated.getEndDate(), id);
         existing.setStartDate(updated.getStartDate());
         existing.setEndDate(updated.getEndDate());
         existing.setComment(updated.getComment());
