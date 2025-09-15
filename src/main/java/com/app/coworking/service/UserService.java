@@ -34,7 +34,7 @@ public class UserService {
 
     @Transactional
     public List<User> getAllUsers() {
-        return userRepository.findAll(); // работа с кешем + not found
+        return userRepository.findAll();
     }
 
     @Transactional

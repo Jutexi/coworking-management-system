@@ -50,7 +50,7 @@ public class UserController {
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         userService.deleteUser(id);
-        return ResponseEntity.noContent().build(); // возвращает статус 204 No Content
+        return ResponseEntity.noContent().build();
     }
 }
 

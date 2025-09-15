@@ -40,7 +40,7 @@ public class WorkspaceService {
 
     @Transactional
     public List<Workspace> getAllWorkspaces() {
-        return workspaceRepository.findAll();  // работа с кешем
+        return workspaceRepository.findAll();
     }
 
     @Transactional
@@ -48,10 +48,8 @@ public class WorkspaceService {
         Coworking coworking = coworkingRepository.findById(coworkingId)
                 .orElseThrow(() -> new ResourceNotFoundException("Coworking not found with id " + coworkingId));
 
-        // Привязываем к coworking
         workspace.setCoworking(coworking);
 
-        // Проверка уникальности имени рабочего места в пределах этого коворкинга
         if (workspaceRepository.existsByNameAndCoworking_Id(workspace.getName(), coworkingId)) {
             throw new AlreadyExistsException("Workspace with this name already exists in the coworking");
         }
@@ -65,7 +63,6 @@ public class WorkspaceService {
     public Workspace updateWorkspace(Long id, Workspace updatedWorkspace) {
         Workspace existing = getWorkspaceById(id);
 
-        // Проверка уникальности имени
         if (!existing.getName().equals(updatedWorkspace.getName()) &&
                 workspaceRepository.existsByNameAndCoworking_Id(updatedWorkspace.getName(),
                         existing.getCoworking().getId())) {

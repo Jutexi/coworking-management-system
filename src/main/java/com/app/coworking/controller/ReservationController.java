@@ -65,7 +65,6 @@ public class ReservationController {
         return ResponseEntity.noContent().build(); // статус 204 No Content
     }
 
-    // ------------------- Новый bulk POST -------------------
     @Operation(summary = "Создать несколько бронирований", description = "Создает сразу несколько бронирований через bulk-операцию")
     @PostMapping("/bulk")
     public ResponseEntity<List<Reservation>> createBulk(@RequestBody List<Reservation> reservations) {

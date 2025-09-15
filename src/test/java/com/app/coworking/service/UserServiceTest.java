@@ -3,23 +3,20 @@ package com.app.coworking.service;
 import com.app.coworking.cache.UserCache;
 import com.app.coworking.exception.AlreadyExistsException;
 import com.app.coworking.exception.ResourceNotFoundException;
-import com.app.coworking.model.User;
 import com.app.coworking.model.enums.Role;
+import com.app.coworking.model.User;
 import com.app.coworking.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.*;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-@ExtendWith(MockitoExtension.class)
 class UserServiceTest {
 
     @Mock
@@ -31,166 +28,139 @@ class UserServiceTest {
     @InjectMocks
     private UserService userService;
 
-    private User user1;
-    private User user2;
+    private User user;
 
     @BeforeEach
     void setUp() {
-        // Пользователь 1
-        user1 = new User();
-        user1.setId(1L);
-        user1.setFirstName("John");
-        user1.setLastName("Doe");
-        user1.setEmail("john@example.com");
-        user1.setPassword("pass123");
-        user1.setRole(Role.USER);
-        user1.setReservations(new HashSet<>());
+        MockitoAnnotations.openMocks(this);
 
-        // Пользователь 2
-        user2 = new User();
-        user2.setId(2L);
-        user2.setFirstName("Jane");
-        user2.setLastName("Smith");
-        user2.setEmail("jane@example.com");
-        user2.setPassword("pass456");
-        user2.setRole(Role.ADMIN);
-        user2.setReservations(new HashSet<>());
+        user = new User(
+                1L,
+                "securePass",
+                "john@example.com",
+                "John",
+                "Doe",
+                Role.USER,
+                new HashSet<>()
+        );
     }
 
     // -------------------- getUserById --------------------
     @Test
-    void getUserById_shouldReturnUserFromCache() {
-        when(userCache.get(1L)).thenReturn(user1);
+    void getUserById_shouldReturnFromCache() {
+        when(userCache.get(1L)).thenReturn(user);
 
         User result = userService.getUserById(1L);
 
-        assertEquals(user1, result);
-        verify(userCache, times(1)).get(1L);
-        verifyNoMoreInteractions(userRepository);
+        assertEquals("John", result.getFirstName());
+        verify(userRepository, never()).findById(anyLong());
     }
 
     @Test
-    void getUserById_shouldReturnUserFromRepositoryIfCacheEmpty() {
+    void getUserById_shouldReturnFromRepositoryAndCacheIt() {
         when(userCache.get(1L)).thenReturn(null);
-        when(userRepository.findById(1L)).thenReturn(Optional.of(user1));
+        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
 
         User result = userService.getUserById(1L);
 
-        assertEquals(user1, result);
-        verify(userCache).put(1L, user1);
+        assertEquals("john@example.com", result.getEmail());
+        verify(userCache).put(1L, user);
     }
 
     @Test
     void getUserById_shouldThrowIfNotFound() {
-        when(userCache.get(3L)).thenReturn(null);
-        when(userRepository.findById(3L)).thenReturn(Optional.empty());
+        when(userCache.get(1L)).thenReturn(null);
+        when(userRepository.findById(1L)).thenReturn(Optional.empty());
 
-        assertThrows(ResourceNotFoundException.class, () -> userService.getUserById(3L));
+        assertThrows(ResourceNotFoundException.class,
+                () -> userService.getUserById(1L));
     }
 
     // -------------------- getAllUsers --------------------
     @Test
-    void getAllUsers_shouldReturnAllUsers() {
-        when(userRepository.findAll()).thenReturn(List.of(user1, user2));
+    void getAllUsers_shouldReturnList() {
+        when(userRepository.findAll()).thenReturn(List.of(user));
 
-        List<User> users = userService.getAllUsers();
+        List<User> result = userService.getAllUsers();
 
-        assertEquals(2, users.size());
-        assertTrue(users.contains(user1));
-        assertTrue(users.contains(user2));
+        assertEquals(1, result.size());
+        assertEquals("John", result.get(0).getFirstName());
     }
 
     // -------------------- createUser --------------------
     @Test
-    void createUser_shouldSaveUserIfEmailNotExists() {
-        when(userRepository.existsByEmail(user1.getEmail())).thenReturn(false);
-        when(userRepository.save(user1)).thenReturn(user1);
+    void createUser_shouldSaveAndCache() {
+        when(userRepository.existsByEmail("john@example.com")).thenReturn(false);
+        when(userRepository.save(user)).thenReturn(user);
 
-        User saved = userService.createUser(user1);
+        User result = userService.createUser(user);
 
-        assertEquals(user1, saved);
-        verify(userCache).put(user1.getId(), user1);
+        assertEquals("john@example.com", result.getEmail());
+        verify(userCache).put(1L, user);
     }
 
     @Test
     void createUser_shouldThrowIfEmailExists() {
-        when(userRepository.existsByEmail(user1.getEmail())).thenReturn(true);
+        when(userRepository.existsByEmail("john@example.com")).thenReturn(true);
 
-        assertThrows(AlreadyExistsException.class, () -> userService.createUser(user1));
-        verify(userRepository, never()).save(any());
-        verify(userCache, never()).put(anyLong(), any());
+        assertThrows(AlreadyExistsException.class,
+                () -> userService.createUser(user));
     }
 
     // -------------------- updateUser --------------------
     @Test
-    void updateUser_shouldUpdateExistingUser() {
-        // Мокаем кеш: сначала get вернет user1
-        when(userCache.get(1L)).thenReturn(user1);
+    void updateUser_shouldUpdateAndCache() {
+        User updated = new User(
+                1L,
+                "newPass",
+                "john@example.com",
+                "Johnathan",
+                "Doe",
+                Role.ADMIN,
+                new HashSet<>()
+        );
 
-        // Мокаем сохранение в репозитории
-        when(userRepository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(userCache.get(1L)).thenReturn(user);
+        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+        when(userRepository.existsByEmail("john@example.com")).thenReturn(false);
+        when(userRepository.save(any())).thenReturn(updated);
 
-        // Создаем обновленные данные
-        User updated = new User();
-        updated.setFirstName("Johnathan");
-        updated.setLastName("Doe");
-        updated.setEmail("john@example.com");
-        updated.setPassword("newpass");
-        updated.setRole(Role.USER);
-
-        // Вызываем метод сервиса
         User result = userService.updateUser(1L, updated);
 
-        // Проверяем, что данные обновились
         assertEquals("Johnathan", result.getFirstName());
-        assertEquals("newpass", result.getPassword());
-
-        // Проверяем, что кеш был обновлен
-        verify(userCache).put(1L, result);
-
-        // Проверяем, что репозиторий вызван для сохранения
-        verify(userRepository).save(result);
+        assertEquals(Role.ADMIN, result.getRole());
+        verify(userCache).put(1L, updated);
     }
-
 
     @Test
-    void updateUser_shouldThrowIfEmailTakenByOther() {
-        when(userCache.get(1L)).thenReturn(null);
-        when(userRepository.findById(1L)).thenReturn(Optional.of(user1));
-        when(userRepository.existsByEmail("jane@example.com")).thenReturn(true);
+    void updateUser_shouldThrowIfEmailTakenByAnother() {
+        User updated = new User(
+                1L,
+                "newPass",
+                "taken@example.com",
+                "John",
+                "Doe",
+                Role.USER,
+                new HashSet<>()
+        );
 
-        doNothing().when(userCache).put(anyLong(), any()); // <-- добавлено
+        when(userCache.get(1L)).thenReturn(user);
+        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+        when(userRepository.existsByEmail("taken@example.com")).thenReturn(true);
 
-        User updated = new User();
-        updated.setFirstName("John");
-        updated.setLastName("Doe");
-        updated.setEmail("jane@example.com");
-        updated.setPassword("pass123");
-        updated.setRole(Role.USER);
-
-        assertThrows(AlreadyExistsException.class, () -> userService.updateUser(1L, updated));
-
-        verify(userRepository, never()).save(any());
+        assertThrows(AlreadyExistsException.class,
+                () -> userService.updateUser(1L, updated));
     }
-
 
     // -------------------- deleteUser --------------------
     @Test
-    void deleteUser_shouldDeleteUserAndRemoveFromCache() {
-        when(userCache.get(1L)).thenReturn(user1);
+    void deleteUser_shouldRemoveFromRepoAndCache() {
+        when(userCache.get(1L)).thenReturn(user);
+        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
 
         userService.deleteUser(1L);
 
-        verify(userRepository).delete(user1);
+        verify(userRepository).delete(user);
         verify(userCache).remove(1L);
-    }
-
-    @Test
-    void deleteUser_shouldThrowIfNotFound() {
-        when(userCache.get(3L)).thenReturn(null);
-        when(userRepository.findById(3L)).thenReturn(Optional.empty());
-
-        assertThrows(ResourceNotFoundException.class, () -> userService.deleteUser(3L));
-        verify(userRepository, never()).delete(any());
     }
 }

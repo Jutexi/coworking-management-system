@@ -35,8 +35,9 @@ public class CoworkingService {
 
     @Transactional
     public List<Coworking> getAllCoworkings() {
-        return coworkingRepository.findAll(); // работа с кешем?
+        return coworkingRepository.findAll();
     }
+
     @Transactional
     public Coworking createCoworking(Coworking coworking) {
         if (coworkingRepository.existsByName(coworking.getName())) {

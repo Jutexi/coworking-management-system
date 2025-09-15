@@ -54,6 +54,6 @@ public class WorkspaceController {
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         workspaceService.deleteWorkspace(id);
-        return ResponseEntity.noContent().build(); // возвращает статус 204 No Content
+        return ResponseEntity.noContent().build();
     }
 }

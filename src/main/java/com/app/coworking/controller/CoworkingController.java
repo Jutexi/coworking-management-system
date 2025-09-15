@@ -50,8 +50,6 @@ public class CoworkingController {
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         coworkingService.deleteCoworking(id);
-        return ResponseEntity.noContent().build(); // возвращает статус 204 No Content
+        return ResponseEntity.noContent().build();
     }
 }
-
-

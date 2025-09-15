@@ -14,6 +14,7 @@ import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 @Service
@@ -23,6 +24,8 @@ public class ReservationService {
     private final WorkspaceRepository workspaceRepository;
     private final UserRepository userRepository;
     private final ReservationCache reservationCache;
+
+    private static final int MIN_OFFICE_DAYS = 7;
 
     public ReservationService(ReservationRepository reservationRepository,
                               WorkspaceRepository workspaceRepository,
@@ -47,7 +50,7 @@ public class ReservationService {
 
     @Transactional
     public List<Reservation> getAllReservations() {
-        return reservationRepository.findAll();  // работа с кешем
+        return reservationRepository.findAll();
     }
 
     @Transactional
@@ -58,19 +61,85 @@ public class ReservationService {
         return reservationRepository.findByUserId(userId);
     }
 
+    private void checkAvailability(Workspace workspace, User user,
+                                   LocalDate start, LocalDate end, Long excludeReservationId) {
+
+        // 1) конец не может быть раньше начала (end < start) — равно допустимо (one-day)
+        if (end.isBefore(start)) {
+            throw new IllegalArgumentException("End date must be same or after start date");
+        }
+
+        // 2) длительность включительно (например, start==end => daysInclusive = 1)
+        long daysInclusive = ChronoUnit.DAYS.between(start, end) + 1;
+
+        // 3) правила по типу workspace
+        if (workspace.getType() == WorkspaceType.OFFICE) {
+            final int MIN_OFFICE_DAYS = 7; // <- можно изменить на 30
+            if (daysInclusive < MIN_OFFICE_DAYS) {
+                throw new IllegalArgumentException("Office reservations must be at least " + MIN_OFFICE_DAYS + " days long");
+            }
+        }
+
+        // 4) находим пересекающиеся бронирования
+        List<Reservation> overlapping = reservationRepository.findOverlappingReservations(
+                workspace.getId(), start, end
+        );
+
+// при update исключаем саму бронь
+        if (excludeReservationId != null) {
+            overlapping.removeIf(r -> r.getId().equals(excludeReservationId));
+        }
+
+// 5) capacity проверки
+        if (workspace.getType() == WorkspaceType.OPEN_SPACE) {
+            // для open space реально используем capacity
+            if (overlapping.size() >= workspace.getCapacity()) {
+                throw new AlreadyExistsException("Open space capacity exceeded for the selected dates");
+            }
+        } else {
+            // для всех остальных capacity = 1
+            if (!overlapping.isEmpty()) {
+                throw new AlreadyExistsException("This workspace is already reserved for the selected period");
+            }
+        }
+
+    }
+
     @Transactional
     public Reservation createReservation(Long workspaceId, Long userId, Reservation reservation) {
-        throw new AlreadyExistsException("Reservation does not work");
+        Workspace workspace = workspaceRepository.findById(workspaceId)
+                .orElseThrow(() -> new ResourceNotFoundException("Workspace not found with id " + workspaceId));
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with id " + userId));
+        // валидация нужна
+        reservation.setWorkspace(workspace);
+        reservation.setUser(user);
+
+        Reservation saved = reservationRepository.save(reservation);
+        reservationCache.put(saved.getId(), saved);
+        return saved;
     }
 
     @Transactional
     public Reservation updateReservation(Long id, Reservation updated) {
-        throw new AlreadyExistsException("Reservation updated does not work");
+        Reservation existing = reservationRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Reservation not found with id " + id));
+        //валидация нужна
+        existing.setStartDate(updated.getStartDate());
+        existing.setEndDate(updated.getEndDate());
+        existing.setComment(updated.getComment());
+
+        Reservation saved = reservationRepository.save(existing);
+        reservationCache.put(saved.getId(), saved);
+        return saved;
     }
 
     @Transactional
     public List<Reservation> createBulkReservations(List<Reservation> reservations) {
-        throw new AlreadyExistsException("Reservations bulk does not work");
+        return reservations.stream()
+                .map(r -> createReservation(r.getWorkspaceId(), r.getUserId(), r))
+                .toList();
     }
 
     @Transactional
