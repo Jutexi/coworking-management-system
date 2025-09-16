@@ -73,7 +73,7 @@ public class WorkspaceService {
             throw new AlreadyExistsException(
                     "Workspace with this name already exists in the coworking");
         }
-        //12
+        //123
         existing.setName(updatedWorkspace.getName());
         existing.setDescription(updatedWorkspace.getDescription());
         existing.setType(updatedWorkspace.getType());
