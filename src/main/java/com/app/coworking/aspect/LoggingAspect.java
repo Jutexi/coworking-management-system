@@ -1,16 +1,18 @@
 package com.app.coworking.aspect;
 
-import com.app.coworking.exception.ControllerInvocationException;
 import java.util.Arrays;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 @Aspect
 @Component
 public class LoggingAspect {
+    private static final Logger logger = LoggerFactory.getLogger(LoggingAspect.class);
 
     @Pointcut("execution(* com.app.coworking.controller.*.*(..))")
     public void controllerMethods() {}
@@ -21,29 +23,17 @@ public class LoggingAspect {
         String className = joinPoint.getTarget().getClass().getSimpleName();
         Object[] args = joinPoint.getArgs();
 
-        // Логируем только вызов метода и его аргументы
-        if (org.slf4j.LoggerFactory.getLogger(className).isInfoEnabled()) {
-            org.slf4j.LoggerFactory.getLogger(className)
-                    .info("Controller method {}.{}() called with args: {}",
-                            className, methodName, Arrays.toString(args));
-        }
+        logger.info("Controller method {}.{}() called with args: {}",
+                className, methodName, Arrays.toString(args));
 
         try {
             Object result = joinPoint.proceed();
-
-            // Логируем успешное завершение метода
-            org.slf4j.LoggerFactory.getLogger(className)
-                    .info("Controller method {}.{}() completed successfully",
-                            className, methodName);
-
+            logger.info("Controller method {}.{}() completed successfully",
+                    className, methodName);
             return result;
-
         } catch (Exception e) {
-            // Не логируем здесь, а просто пробрасываем кастомное исключение
-            throw new ControllerInvocationException(
-                    String.format("Error in controller method %s.%s()", className, methodName),
-                    e
-            );
+            logger.error("Error in {}.{}(): {}", className, methodName, e.getMessage());
+            throw e;
         }
     }
 }
