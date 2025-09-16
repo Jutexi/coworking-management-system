@@ -63,7 +63,7 @@ public class ReservationService {
         return reservationRepository.findByUserId(userId);
     }
 
-    private void checkAvailability(Workspace workspace, User user,
+    private void checkAvailability(Workspace workspace,
                                    LocalDate start, LocalDate end, Long excludeReservationId) {
 
         // 1) конец не может быть раньше начала (end < start) — равно допустимо (one-day)
@@ -75,12 +75,9 @@ public class ReservationService {
         long daysInclusive = ChronoUnit.DAYS.between(start, end) + 1;
 
         // 3) правила по типу workspace
-        if (workspace.getType() == WorkspaceType.OFFICE) {
-            // <- можно изменить на 30
-            if (daysInclusive < 7) {
-                throw new InvalidArgumentException(
-                        "Office reservations must be at least " + 7 + " days long");
-            }
+        if (workspace.getType() == WorkspaceType.OFFICE && daysInclusive < 7) {
+            throw new InvalidArgumentException(
+                    "Office reservations must be at least " + 7 + " days long");
         }
 
         // 4) находим пересекающиеся бронирования
@@ -120,7 +117,7 @@ public class ReservationService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "User not found with id " + userId));
-        checkAvailability(workspace, user, reservation.getStartDate(),
+        checkAvailability(workspace, reservation.getStartDate(),
                 reservation.getEndDate(), null);
         reservation.setWorkspace(workspace);
         reservation.setUser(user);
@@ -136,8 +133,7 @@ public class ReservationService {
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "Reservation not found with id " + id));
         Workspace workspace = existing.getWorkspace();
-        User user = existing.getUser();
-        checkAvailability(workspace, user, updated.getStartDate(), updated.getEndDate(), id);
+        checkAvailability(workspace, updated.getStartDate(), updated.getEndDate(), id);
         existing.setStartDate(updated.getStartDate());
         existing.setEndDate(updated.getEndDate());
         existing.setComment(updated.getComment());

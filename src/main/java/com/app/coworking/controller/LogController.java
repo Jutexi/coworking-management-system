@@ -8,7 +8,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.util.List;
-import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
@@ -39,7 +38,7 @@ public class LogController {
         List<String> filteredLogs = Files.readAllLines(Paths.get(logFilePath))
                 .stream()
                 .filter(line -> line.contains(filterDate))
-                .collect(Collectors.toList());
+                .toList();
 
         if (filteredLogs.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
