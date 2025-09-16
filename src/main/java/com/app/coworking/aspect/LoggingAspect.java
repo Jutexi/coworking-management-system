@@ -34,16 +34,16 @@ public class LoggingAspect {
         try {
             Object result = joinPoint.proceed();
 
-            logger.info("Controller method {}.{}() completed successfully",
-                    className, methodName);
+            // Логируем успешное завершение метода
+            logger.info("Controller method {}.{}() completed successfully", className, methodName);
 
             return result;
 
         } catch (Exception e) {
-            // логируем исключение вместе со стеком
+            // Логируем исключение вместе со стеком
             logger.error("Error in {}.{}()", className, methodName, e);
 
-            // пробрасываем кастомное исключение с оригинальным cause
+            // Пробрасываем кастомное исключение с контекстом и оригинальным cause
             throw new ControllerInvocationException(
                     String.format("Error in controller method %s.%s()", className, methodName),
                     e
