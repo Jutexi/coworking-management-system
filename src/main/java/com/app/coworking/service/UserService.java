@@ -6,9 +6,9 @@ import com.app.coworking.exception.ResourceNotFoundException;
 import com.app.coworking.model.User;
 import com.app.coworking.repository.UserRepository;
 import jakarta.transaction.Transactional;
+import java.util.List;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 
 @Service
 public class UserService {
@@ -24,7 +24,9 @@ public class UserService {
     @Transactional
     public User getUserById(Long id) {
         User user = userCache.get(id);
-        if (user != null) return user;
+        if (user != null) {
+            return user;
+        }
 
         user = userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with id " + id));
@@ -52,8 +54,8 @@ public class UserService {
     public User updateUser(Long id, User updatedUser) {
         User existing = getUserById(id);
 
-        if (!existing.getEmail().equals(updatedUser.getEmail()) &&
-                userRepository.existsByEmail(updatedUser.getEmail())) {
+        if (!existing.getEmail().equals(updatedUser.getEmail())
+                && userRepository.existsByEmail(updatedUser.getEmail())) {
             throw new AlreadyExistsException("Email is already in use");
         }
 

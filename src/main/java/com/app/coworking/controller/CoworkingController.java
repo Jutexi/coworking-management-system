@@ -4,12 +4,20 @@ import com.app.coworking.model.Coworking;
 import com.app.coworking.service.CoworkingService;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
+
 
 @RestController
 @RequestMapping("/api/coworkings")
@@ -18,30 +26,35 @@ public class CoworkingController {
 
     private final CoworkingService coworkingService;
 
-    @Operation(summary = "Получить все коворкинги", description = "Возвращает список всех коворкингов")
+    @Operation(summary = "Получить все коворкинги",
+            description = "Возвращает список всех коворкингов")
     @GetMapping
     public ResponseEntity<List<Coworking>> getAll() {
         List<Coworking> coworkings = coworkingService.getAllCoworkings();
         return ResponseEntity.ok(coworkings);
     }
 
-    @Operation(summary = "Получить коворкинг по ID", description = "Возвращает коворкинг по его уникальному идентификатору")
+    @Operation(summary = "Получить коворкинг по ID",
+            description = "Возвращает коворкинг по его уникальному идентификатору")
     @GetMapping("/{id}")
     public ResponseEntity<Coworking> getById(@PathVariable Long id) {
         Coworking coworking = coworkingService.getCoworkingById(id);
         return ResponseEntity.ok(coworking);
     }
 
-    @Operation(summary = "Создать новый коворкинг", description = "Принимает объект коворкинга и сохраняет его в базе")
+    @Operation(summary = "Создать новый коворкинг",
+            description = "Принимает объект коворкинга и сохраняет его в базе")
     @PostMapping
     public ResponseEntity<Coworking> create(@Valid @RequestBody Coworking coworking) {
         Coworking created = coworkingService.createCoworking(coworking);
         return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
 
-    @Operation(summary = "Обновить коворкинг", description = "Обновляет данные коворкинга по его ID")
+    @Operation(summary = "Обновить коворкинг",
+            description = "Обновляет данные коворкинга по его ID")
     @PutMapping("/{id}")
-    public ResponseEntity<Coworking> update(@PathVariable Long id, @Valid @RequestBody Coworking coworking) {
+    public ResponseEntity<Coworking> update(@PathVariable Long id,
+                                            @Valid @RequestBody Coworking coworking) {
         Coworking updated = coworkingService.updateCoworking(id, coworking);
         return ResponseEntity.ok(updated);
     }

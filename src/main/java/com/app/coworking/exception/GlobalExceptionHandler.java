@@ -1,5 +1,7 @@
 package com.app.coworking.exception;
 
+import java.util.HashMap;
+import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -9,8 +11,6 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-import java.util.HashMap;
-import java.util.Map;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler { // может все же убрать отсюда логгер
@@ -19,7 +19,8 @@ public class GlobalExceptionHandler { // может все же убрать о�
 
     // Ошибки Bean Validation (@NotBlank, @Email, @Future, @Size и т.д.)
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<Map<String, String>> handleValidationExceptions(MethodArgumentNotValidException ex) {
+    public ResponseEntity<Map<String, String>> handleValidationExceptions(
+            MethodArgumentNotValidException ex) {
         Map<String, String> errors = new HashMap<>();
         ex.getBindingResult().getFieldErrors()
                 .forEach(error -> errors.put(error.getField(), error.getDefaultMessage()));
@@ -31,7 +32,8 @@ public class GlobalExceptionHandler { // может все же убрать о�
 
     // Ошибки при десериализации JSON (например, неправильный формат даты)
     @ExceptionHandler(HttpMessageNotReadableException.class)
-    public ResponseEntity<Map<String, String>> handleInvalidFormatException(HttpMessageNotReadableException ex) {
+    public ResponseEntity<Map<String, String>> handleInvalidFormatException(
+            HttpMessageNotReadableException ex) {
         String message = "Invalid request format: " + ex.getMostSpecificCause().getMessage();
 
         logger.error("JSON deserialization error: {}", message, ex);
@@ -41,7 +43,8 @@ public class GlobalExceptionHandler { // может все же убрать о�
 
     // ResourceNotFoundException → 404
     @ExceptionHandler(ResourceNotFoundException.class)
-    public ResponseEntity<Map<String, String>> handleResourceNotFound(ResourceNotFoundException ex) {
+    public ResponseEntity<Map<String, String>> handleResourceNotFound(
+            ResourceNotFoundException ex) {
         logger.error("Resource not found: {}", ex.getMessage(), ex);
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", ex.getMessage()));
     }

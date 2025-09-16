@@ -8,9 +8,8 @@ import com.app.coworking.model.Workspace;
 import com.app.coworking.repository.CoworkingRepository;
 import com.app.coworking.repository.WorkspaceRepository;
 import jakarta.transaction.Transactional;
-import org.springframework.stereotype.Service;
-
 import java.util.List;
+import org.springframework.stereotype.Service;
 
 @Service
 public class WorkspaceService {
@@ -30,10 +29,13 @@ public class WorkspaceService {
     @Transactional
     public Workspace getWorkspaceById(Long id) {
         Workspace workspace = workspaceCache.get(id);
-        if (workspace != null) return workspace;
+        if (workspace != null) {
+            return workspace;
+        }
 
         workspace = workspaceRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Workspace not found with id " + id));
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Workspace not found with id " + id));
         workspaceCache.put(id, workspace);
         return workspace;
     }
@@ -46,12 +48,14 @@ public class WorkspaceService {
     @Transactional
     public Workspace createWorkspace(Long coworkingId, Workspace workspace) {
         Coworking coworking = coworkingRepository.findById(coworkingId)
-                .orElseThrow(() -> new ResourceNotFoundException("Coworking not found with id " + coworkingId));
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Coworking not found with id " + coworkingId));
 
         workspace.setCoworking(coworking);
 
-        if (workspaceRepository.existsByNameAndCoworking_Id(workspace.getName(), coworkingId)) {
-            throw new AlreadyExistsException("Workspace with this name already exists in the coworking");
+        if (workspaceRepository.existsByNameAndCoworkingId(workspace.getName(), coworkingId)) {
+            throw new AlreadyExistsException(
+                    "Workspace with this name already exists in the coworking");
         }
 
         Workspace saved = workspaceRepository.save(workspace);
@@ -63,10 +67,11 @@ public class WorkspaceService {
     public Workspace updateWorkspace(Long id, Workspace updatedWorkspace) {
         Workspace existing = getWorkspaceById(id);
 
-        if (!existing.getName().equals(updatedWorkspace.getName()) &&
-                workspaceRepository.existsByNameAndCoworking_Id(updatedWorkspace.getName(),
+        if (!existing.getName().equals(updatedWorkspace.getName())
+                && workspaceRepository.existsByNameAndCoworkingId(updatedWorkspace.getName(),
                         existing.getCoworking().getId())) {
-            throw new AlreadyExistsException("Workspace with this name already exists in the coworking");
+            throw new AlreadyExistsException(
+                    "Workspace with this name already exists in the coworking");
         }
 
         existing.setName(updatedWorkspace.getName());

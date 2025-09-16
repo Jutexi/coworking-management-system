@@ -6,5 +6,10 @@ import jakarta.validation.constraints.Size;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface WorkspaceRepository extends JpaRepository<Workspace, Long> {
-    boolean existsByNameAndCoworking_Id(@NotBlank(message = "Workspace name is required") @Size(min = 2, max = 100, message = "Workspace name must be between 2 and 100 characters") String name, Long coworkingId);
+    boolean existsByNameAndCoworkingId(@NotBlank(message = "Workspace name is required")
+                                        @Size(min = 2, max = 100,
+                                                message =
+                                                "Workspace name must be "
+                                                        + "between 2 and 100 characters")
+                                        String name, Long coworkingId);
 }

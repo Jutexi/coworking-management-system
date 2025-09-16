@@ -102,7 +102,7 @@ class WorkspaceServiceTest {
     @Test
     void createWorkspace_shouldSaveAndCache() {
         when(coworkingRepository.findById(1L)).thenReturn(Optional.of(coworking));
-        when(workspaceRepository.existsByNameAndCoworking_Id("Meeting Room A", 1L)).thenReturn(false);
+        when(workspaceRepository.existsByNameAndCoworkingId("Meeting Room A", 1L)).thenReturn(false);
         when(workspaceRepository.save(workspace)).thenReturn(workspace);
 
         Workspace result = workspaceService.createWorkspace(1L, workspace);
@@ -122,7 +122,7 @@ class WorkspaceServiceTest {
     @Test
     void createWorkspace_shouldThrowIfNameExistsInCoworking() {
         when(coworkingRepository.findById(1L)).thenReturn(Optional.of(coworking));
-        when(workspaceRepository.existsByNameAndCoworking_Id("Meeting Room A", 1L)).thenReturn(true);
+        when(workspaceRepository.existsByNameAndCoworkingId("Meeting Room A", 1L)).thenReturn(true);
 
         assertThrows(AlreadyExistsException.class,
                 () -> workspaceService.createWorkspace(1L, workspace));
@@ -143,7 +143,7 @@ class WorkspaceServiceTest {
 
         when(workspaceCache.get(1L)).thenReturn(workspace);
         when(workspaceRepository.findById(1L)).thenReturn(Optional.of(workspace));
-        when(workspaceRepository.existsByNameAndCoworking_Id("Conference Room B", 1L)).thenReturn(false);
+        when(workspaceRepository.existsByNameAndCoworkingId("Conference Room B", 1L)).thenReturn(false);
         when(workspaceRepository.save(any())).thenReturn(updated);
 
         Workspace result = workspaceService.updateWorkspace(1L, updated);
@@ -166,7 +166,7 @@ class WorkspaceServiceTest {
 
         when(workspaceCache.get(1L)).thenReturn(workspace);
         when(workspaceRepository.findById(1L)).thenReturn(Optional.of(workspace));
-        when(workspaceRepository.existsByNameAndCoworking_Id("Another Room", 1L)).thenReturn(true);
+        when(workspaceRepository.existsByNameAndCoworkingId("Another Room", 1L)).thenReturn(true);
 
         assertThrows(AlreadyExistsException.class,
                 () -> workspaceService.updateWorkspace(1L, updated));

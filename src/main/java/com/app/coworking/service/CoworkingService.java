@@ -6,9 +6,9 @@ import com.app.coworking.exception.ResourceNotFoundException;
 import com.app.coworking.model.Coworking;
 import com.app.coworking.repository.CoworkingRepository;
 import jakarta.transaction.Transactional;
+import java.util.List;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 
 @Service
 public class CoworkingService {
@@ -16,7 +16,8 @@ public class CoworkingService {
     private final CoworkingRepository coworkingRepository;
     private final CoworkingCache coworkingCache;
 
-    public CoworkingService(CoworkingRepository coworkingRepository, CoworkingCache coworkingCache) {
+    public CoworkingService(CoworkingRepository coworkingRepository,
+                            CoworkingCache coworkingCache) {
         this.coworkingRepository = coworkingRepository;
         this.coworkingCache = coworkingCache;
     }
@@ -28,7 +29,8 @@ public class CoworkingService {
             return coworking;
         }
         coworking = coworkingRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Coworking not found with id " + id));
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("Coworking not found with id " + id));
         coworkingCache.put(id, coworking);
         return coworking;
     }
@@ -41,10 +43,12 @@ public class CoworkingService {
     @Transactional
     public Coworking createCoworking(Coworking coworking) {
         if (coworkingRepository.existsByName(coworking.getName())) {
-            throw new AlreadyExistsException("Coworking with name '" + coworking.getName() + "' already exists");
+            throw new AlreadyExistsException(
+                    "Coworking with name '" + coworking.getName() + "' already exists");
         }
         if (coworkingRepository.existsByAddress(coworking.getAddress())) {
-            throw new AlreadyExistsException("Coworking with address '" + coworking.getAddress() + "' already exists");
+            throw new AlreadyExistsException(
+                    "Coworking with address '" + coworking.getAddress() + "' already exists");
         }
 
         Coworking saved = coworkingRepository.save(coworking);
@@ -57,13 +61,16 @@ public class CoworkingService {
         Coworking existing = getCoworkingById(id);
 
         // Проверка уникальности (кроме текущей записи)
-        if (!existing.getName().equals(updatedCoworking.getName()) &&
-                coworkingRepository.existsByName(updatedCoworking.getName())) {
-            throw new AlreadyExistsException("Coworking with name '" + updatedCoworking.getName() + "' already exists");
+        if (!existing.getName().equals(updatedCoworking.getName())
+                && coworkingRepository.existsByName(updatedCoworking.getName())) {
+            throw new AlreadyExistsException(
+                    "Coworking with name '" + updatedCoworking.getName() + "' already exists");
         }
-        if (!existing.getAddress().equals(updatedCoworking.getAddress()) &&
-                coworkingRepository.existsByAddress(updatedCoworking.getAddress())) {
-            throw new AlreadyExistsException("Coworking with address '" + updatedCoworking.getAddress() + "' already exists");
+        if (!existing.getAddress().equals(updatedCoworking.getAddress())
+                && coworkingRepository.existsByAddress(updatedCoworking.getAddress())) {
+            throw new AlreadyExistsException(
+                    "Coworking with address '" + updatedCoworking.getAddress()
+                            + "' already exists");
         }
 
         // Обновляем поля

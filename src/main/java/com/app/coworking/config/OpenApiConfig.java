@@ -8,11 +8,11 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class OpenApiConfig {
     @Bean
-    public OpenAPI customOpenAPI() {
-    return new OpenAPI()
-            .info(new Info()
-            .title("Coworking reservation system API")
-            .version("1.0")
-            .description("This is the API for Coworking reservation system"));
+    public OpenAPI customOpenApi() {
+        return new OpenAPI()
+                .info(new Info()
+                .title("Coworking reservation system API")
+                .version("1.0")
+                .description("This is the API for Coworking reservation system"));
     }
 }

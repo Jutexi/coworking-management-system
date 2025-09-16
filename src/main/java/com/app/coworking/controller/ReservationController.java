@@ -4,12 +4,18 @@ import com.app.coworking.model.Reservation;
 import com.app.coworking.service.ReservationService;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/reservations")
@@ -18,38 +24,44 @@ public class ReservationController {
 
     private final ReservationService reservationService;
 
-    @Operation(summary = "Получить все бронирования", description = "Возвращает список всех бронирований")
+    @Operation(summary = "Получить все бронирования",
+            description = "Возвращает список всех бронирований")
     @GetMapping
     public ResponseEntity<List<Reservation>> getAll() {
         List<Reservation> reservations = reservationService.getAllReservations();
         return ResponseEntity.ok(reservations);
     }
 
-    @Operation(summary = "Получить бронирование по ID", description = "Возвращает бронирование по его уникальному идентификатору")
+    @Operation(summary = "Получить бронирование по ID",
+            description = "Возвращает бронирование по его уникальному идентификатору")
     @GetMapping("/{id}")
     public ResponseEntity<Reservation> getById(@PathVariable Long id) {
         Reservation reservation = reservationService.getReservationById(id);
         return ResponseEntity.ok(reservation);
     }
 
-    @Operation(summary = "Получить бронирования пользователя", description = "Возвращает список бронирований конкретного пользователя по userId")
+    @Operation(summary = "Получить бронирования пользователя",
+            description = "Возвращает список бронирований конкретного пользователя по userId")
     @GetMapping("/by-user/{userId}")
     public ResponseEntity<List<Reservation>> getByUser(@PathVariable Long userId) {
         List<Reservation> reservations = reservationService.getReservationsByUser(userId);
         return ResponseEntity.ok(reservations);
     }
 
-    @Operation(summary = "Создать бронирование", description = "Создает новое бронирование для указанного workspace и пользователя")
+    @Operation(summary = "Создать бронирование",
+            description = "Создает новое бронирование для указанного workspace и пользователя")
     @PostMapping("/workspace/{workspaceId}/user/{userId}")
     public ResponseEntity<Reservation> create(@PathVariable Long workspaceId,
                                               @PathVariable Long userId,
                                               @Valid @RequestBody Reservation reservation) {
         // Здесь пока заглушка на сервисе
-        Reservation created = reservationService.createReservation(workspaceId, userId, reservation);
+        Reservation created = reservationService.createReservation(
+                workspaceId, userId, reservation);
         return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
 
-    @Operation(summary = "Обновить бронирование", description = "Обновляет данные бронирования по его ID")
+    @Operation(summary = "Обновить бронирование",
+            description = "Обновляет данные бронирования по его ID")
     @PutMapping("/{id}")
     public ResponseEntity<Reservation> update(@PathVariable Long id,
                                               @Valid @RequestBody Reservation reservation) {
@@ -65,9 +77,11 @@ public class ReservationController {
         return ResponseEntity.noContent().build(); // статус 204 No Content
     }
 
-    @Operation(summary = "Создать несколько бронирований", description = "Создает сразу несколько бронирований через bulk-операцию")
+    @Operation(summary = "Создать несколько бронирований",
+            description = "Создает сразу несколько бронирований через bulk-операцию")
     @PostMapping("/bulk")
-    public ResponseEntity<List<Reservation>> createBulk(@RequestBody List<Reservation> reservations) {
+    public ResponseEntity<List<Reservation>> createBulk(
+            @RequestBody List<Reservation> reservations) {
         // Здесь пока заглушка на сервисе
         List<Reservation> created = reservationService.createBulkReservations(reservations);
         return ResponseEntity.status(HttpStatus.CREATED).body(created);
