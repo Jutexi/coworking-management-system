@@ -30,12 +30,21 @@ public class LoggingAspect {
 
         try {
             Object result = joinPoint.proceed();
+
             logger.info("Controller method {}.{}() completed successfully",
                     className, methodName);
+
             return result;
+
         } catch (Exception e) {
-            logger.error("Error in {}.{}(): {}", className, methodName, e.getMessage());
-            throw e;
+            // логируем исключение вместе со стеком
+            logger.error("Error in {}.{}()", className, methodName, e);
+
+            // пробрасываем дальше с добавлением контекста
+            throw new RuntimeException(
+                    String.format("Error in controller method %s.%s()", className, methodName), e
+            );
         }
+
     }
 }
