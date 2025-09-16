@@ -1,6 +1,5 @@
 package com.app.coworking.aspect;
 
-import com.app.coworking.exception.ControllerInvocationException;
 import java.util.Arrays;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
@@ -34,20 +33,15 @@ public class LoggingAspect {
         try {
             Object result = joinPoint.proceed();
 
-            // Логируем успешное завершение метода
             logger.info("Controller method {}.{}() completed successfully", className, methodName);
-
             return result;
 
         } catch (Exception e) {
-            // Логируем исключение вместе со стеком
-            logger.error("Error in {}.{}()", className, methodName, e);
+            // Логируем контекст и исходное исключение один раз
+            logger.error("Error in {}.{}(): {}", className, methodName, e.getMessage());
 
-            // Пробрасываем кастомное исключение с контекстом и оригинальным cause
-            throw new ControllerInvocationException(
-                    String.format("Error in controller method %s.%s()", className, methodName),
-                    e
-            );
+            // Пробрасываем без нового стека, просто throw исходного
+            throw e;
         }
     }
 }
