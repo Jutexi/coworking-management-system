@@ -28,13 +28,9 @@ public class LoggingAspect {
                     className, methodName, Arrays.toString(args));
         }
 
-        try {
-            Object result = joinPoint.proceed();
-            logger.info("Controller method {}.{}() completed successfully",
-                    className, methodName);
-            return result;
-        } catch (Exception e) {
-            throw e;
-        }
+        Object result = joinPoint.proceed();
+        logger.info("Controller method {}.{}() completed successfully",
+                className, methodName);
+        return result;
     }
 }
