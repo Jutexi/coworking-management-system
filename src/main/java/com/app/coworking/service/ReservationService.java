@@ -26,8 +26,6 @@ public class ReservationService {
     private final UserRepository userRepository;
     private final ReservationCache reservationCache;
 
-    private static final int MIN_OFFICE_DAYS = 7;
-
     public ReservationService(ReservationRepository reservationRepository,
                               WorkspaceRepository workspaceRepository,
                               UserRepository userRepository,
