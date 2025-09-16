@@ -23,8 +23,10 @@ public class LoggingAspect {
         String className = joinPoint.getTarget().getClass().getSimpleName();
         Object[] args = joinPoint.getArgs();
 
-        logger.info("Controller method {}.{}() called with args: {}",
-                className, methodName, Arrays.toString(args));
+        if (logger.isInfoEnabled()) {
+            logger.info("Controller method {}.{}() called with args: {}",
+                    className, methodName, Arrays.toString(args));
+        }
 
         try {
             Object result = joinPoint.proceed();
@@ -32,7 +34,6 @@ public class LoggingAspect {
                     className, methodName);
             return result;
         } catch (Exception e) {
-            logger.error("Error in {}.{}(): {}", className, methodName, e.getMessage());
             throw e;
         }
     }
