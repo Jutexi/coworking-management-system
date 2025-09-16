@@ -65,6 +65,14 @@ public class GlobalExceptionHandler { // может все же убрать о�
         return ResponseEntity.badRequest().body(Map.of(ERROR_KEY, ex.getMessage()));
     }
 
+    @ExceptionHandler(ControllerInvocationException.class)
+    public ResponseEntity<Map<String, String>> handleControllerInvocation(
+            ControllerInvocationException ex) {
+        logger.error("ControllerInvocationException caught: {}", ex.getMessage(), ex);
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(Map.of(ERROR_KEY, ex.getMessage()));
+    }
+
     // Общий fallback на все другие исключения
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Map<String, String>> handleAllExceptions(Exception ex) {

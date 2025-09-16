@@ -1,5 +1,6 @@
 package com.app.coworking.aspect;
 
+import com.app.coworking.exception.ControllerInvocationException;
 import java.util.Arrays;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
@@ -9,9 +10,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+
 @Aspect
 @Component
 public class LoggingAspect {
+
     private static final Logger logger = LoggerFactory.getLogger(LoggingAspect.class);
 
     @Pointcut("execution(* com.app.coworking.controller.*.*(..))")
@@ -40,11 +43,12 @@ public class LoggingAspect {
             // логируем исключение вместе со стеком
             logger.error("Error in {}.{}()", className, methodName, e);
 
-            // пробрасываем дальше с добавлением контекста
-            throw new RuntimeException(
-                    String.format("Error in controller method %s.%s()", className, methodName), e
+            // пробрасываем кастомное исключение с оригинальным cause
+            throw new ControllerInvocationException(
+                    String.format("Error in controller method %s.%s()", className, methodName),
+                    e
             );
         }
-
     }
 }
+
