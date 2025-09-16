@@ -17,6 +17,8 @@ public class GlobalExceptionHandler { // может все же убрать о�
 
     private final Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
+    private static final String ERROR_KEY = "error";
+
     // Ошибки Bean Validation (@NotBlank, @Email, @Future, @Size и т.д.)
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<Map<String, String>> handleValidationExceptions(
@@ -38,7 +40,7 @@ public class GlobalExceptionHandler { // может все же убрать о�
 
         logger.error("JSON deserialization error: {}", message, ex);
 
-        return ResponseEntity.badRequest().body(Map.of("error", message));
+        return ResponseEntity.badRequest().body(Map.of(ERROR_KEY, message));
     }
 
     // ResourceNotFoundException → 404
@@ -46,21 +48,21 @@ public class GlobalExceptionHandler { // может все же убрать о�
     public ResponseEntity<Map<String, String>> handleResourceNotFound(
             ResourceNotFoundException ex) {
         logger.error("Resource not found: {}", ex.getMessage(), ex);
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", ex.getMessage()));
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of(ERROR_KEY, ex.getMessage()));
     }
 
     // AlreadyExistsException
     @ExceptionHandler(AlreadyExistsException.class)
     public ResponseEntity<Map<String, String>> handleAlreadyExists(AlreadyExistsException ex) {
         logger.error("Already exists error: {}", ex.getMessage(), ex);
-        return ResponseEntity.badRequest().body(Map.of("error", ex.getMessage()));
+        return ResponseEntity.badRequest().body(Map.of(ERROR_KEY, ex.getMessage()));
     }
 
     // Новый обработчик для InvalidArgumentException
     @ExceptionHandler(InvalidArgumentException.class)
     public ResponseEntity<Map<String, String>> handleInvalidArgument(InvalidArgumentException ex) {
         logger.error("Invalid argument error: {}", ex.getMessage(), ex);
-        return ResponseEntity.badRequest().body(Map.of("error", ex.getMessage()));
+        return ResponseEntity.badRequest().body(Map.of(ERROR_KEY, ex.getMessage()));
     }
 
     // Общий fallback на все другие исключения
@@ -68,7 +70,7 @@ public class GlobalExceptionHandler { // может все же убрать о�
     public ResponseEntity<Map<String, String>> handleAllExceptions(Exception ex) {
         logger.error("Unexpected error occurred: {}", ex.getMessage(), ex);
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(Map.of("error", "Unexpected error occurred: " + ex.getMessage()));
+                .body(Map.of(ERROR_KEY, "Unexpected error occurred: " + ex.getMessage()));
     }
 }
 

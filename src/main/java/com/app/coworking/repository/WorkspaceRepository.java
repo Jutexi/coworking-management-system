@@ -1,15 +1,14 @@
 package com.app.coworking.repository;
 
 import com.app.coworking.model.Workspace;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Size;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 public interface WorkspaceRepository extends JpaRepository<Workspace, Long> {
-    boolean existsByNameAndCoworkingId(@NotBlank(message = "Workspace name is required")
-                                        @Size(min = 2, max = 100,
-                                                message =
-                                                "Workspace name must be "
-                                                        + "between 2 and 100 characters")
-                                        String name, Long coworkingId);
+    @Query("SELECT CASE WHEN COUNT(w) > 0 THEN true ELSE false END "
+            + "FROM Workspace w "
+            + "WHERE w.name = :name AND w.coworking.id = :coworkingId")
+    boolean existsByNameAndCoworkingId(@Param("name") String name,
+                                       @Param("coworkingId") Long coworkingId);
 }
