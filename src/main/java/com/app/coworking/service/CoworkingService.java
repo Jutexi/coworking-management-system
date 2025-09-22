@@ -2,6 +2,7 @@ package com.app.coworking.service;
 
 import com.app.coworking.cache.CoworkingCache;
 import com.app.coworking.exception.AlreadyExistsException;
+import com.app.coworking.exception.InvalidArgumentException;
 import com.app.coworking.exception.ResourceNotFoundException;
 import com.app.coworking.model.Coworking;
 import com.app.coworking.repository.CoworkingRepository;
@@ -42,6 +43,13 @@ public class CoworkingService {
 
     @Transactional
     public Coworking createCoworking(Coworking coworking) {
+
+        if (coworking.getWorkspaces() != null && !coworking.getWorkspaces().isEmpty()) {
+            throw new InvalidArgumentException(
+                    "Cannot create workspaces through coworking creation."
+                            + " Use workspace endpoints instead.");
+        }
+
         if (coworkingRepository.existsByName(coworking.getName())) {
             throw new AlreadyExistsException(
                     "Coworking with name '" + coworking.getName() + "' already exists");
@@ -58,6 +66,12 @@ public class CoworkingService {
 
     @Transactional
     public Coworking updateCoworking(Long id, Coworking updatedCoworking) {
+
+        if (updatedCoworking.getWorkspaces() != null && !updatedCoworking.getWorkspaces().isEmpty()) {
+            throw new InvalidArgumentException("Cannot update workspaces through coworking update."
+                    + " Use workspace endpoints instead.");
+        }
+
         Coworking existing = getCoworkingById(id);
 
         // Проверка уникальности (кроме текущей записи)
@@ -88,6 +102,10 @@ public class CoworkingService {
     @Transactional
     public void deleteCoworking(Long id) {
         Coworking existing = getCoworkingById(id);
+        if (existing.getWorkspaces() != null && !existing.getWorkspaces().isEmpty()) {
+            throw new InvalidArgumentException("Cannot delete coworking with existing workspaces."
+                    + " Delete workspaces first.");
+        }
         coworkingRepository.delete(existing);
         coworkingCache.remove(id);
     }

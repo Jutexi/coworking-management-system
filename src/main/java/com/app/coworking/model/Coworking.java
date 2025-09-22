@@ -1,6 +1,7 @@
 package com.app.coworking.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -39,7 +40,7 @@ public class Coworking {
     private String name;
 
     @NotBlank(message = "Address is required")
-    @Size(min = 10, max = 200, message = "Address must be between 10 and 200 characters")
+    @Size(min = 10, max = 500, message = "Address must be between 10 and 500 characters")
     @Column(unique = true, nullable = false)
     private String address;
 
@@ -48,17 +49,17 @@ public class Coworking {
     @Column(nullable = false) //not unique
     private String email;
 
+    //E.164 in some way
     @Pattern(regexp = "^\\+?[1-9]\\d{0,14}$", message = "Invalid phone number format")
     @NotBlank(message = "Phone number is required")
     @Column(name = "phone_number", nullable = false) //not unique
     private String phoneNumber;
 
-    @Size(max = 1000, message = "Description cannot exceed 1000 characters")
     @Column(columnDefinition = "TEXT")
     private String description;
 
     @OneToMany(mappedBy = "coworking", fetch = FetchType.LAZY,
             cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonIgnore
+    @JsonManagedReference
     private Set<Workspace> workspaces = new HashSet<>();
 }

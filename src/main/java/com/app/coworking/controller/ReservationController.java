@@ -40,21 +40,12 @@ public class ReservationController {
         return ResponseEntity.ok(reservation);
     }
 
-    @Operation(summary = "Получить бронирования пользователя",
-            description = "Возвращает список бронирований конкретного пользователя по userId")
-    @GetMapping("/by-user/{userId}")
-    public ResponseEntity<List<Reservation>> getByUser(@PathVariable Long userId) {
-        List<Reservation> reservations = reservationService.getReservationsByUser(userId);
-        return ResponseEntity.ok(reservations);
-    }
-
     @Operation(summary = "Создать бронирование",
             description = "Создает новое бронирование для указанного workspace и пользователя")
     @PostMapping("/workspace/{workspaceId}/user/{userId}")
     public ResponseEntity<Reservation> create(@PathVariable Long workspaceId,
                                               @PathVariable Long userId,
                                               @Valid @RequestBody Reservation reservation) {
-        // Здесь пока заглушка на сервисе
         Reservation created = reservationService.createReservation(
                 workspaceId, userId, reservation);
         return ResponseEntity.status(HttpStatus.CREATED).body(created);
@@ -65,7 +56,6 @@ public class ReservationController {
     @PutMapping("/{id}")
     public ResponseEntity<Reservation> update(@PathVariable Long id,
                                               @Valid @RequestBody Reservation reservation) {
-        // Здесь пока заглушка на сервисе
         Reservation updated = reservationService.updateReservation(id, reservation);
         return ResponseEntity.ok(updated);
     }
@@ -74,16 +64,6 @@ public class ReservationController {
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         reservationService.deleteReservation(id);
-        return ResponseEntity.noContent().build(); // статус 204 No Content
-    }
-
-    @Operation(summary = "Создать несколько бронирований",
-            description = "Создает сразу несколько бронирований через bulk-операцию")
-    @PostMapping("/bulk")
-    public ResponseEntity<List<Reservation>> createBulk(
-            @RequestBody List<Reservation> reservations) {
-        // Здесь пока заглушка на сервисе
-        List<Reservation> created = reservationService.createBulkReservations(reservations);
-        return ResponseEntity.status(HttpStatus.CREATED).body(created);
+        return ResponseEntity.noContent().build();
     }
 }

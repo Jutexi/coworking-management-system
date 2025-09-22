@@ -43,7 +43,8 @@ public class WorkspaceController {
     }
 
     @Operation(summary = "Создать рабочее место в коворкинге",
-            description = "Создает новое рабочее место в указанном коворкинге")
+            description = "Создает новое рабочее место в указанном коворкинге. "
+                    + "Не принимает связанные сущности в теле запроса.")
     @PostMapping("/coworking/{coworkingId}")
     public ResponseEntity<Workspace> create(@PathVariable Long coworkingId,
                                             @Valid @RequestBody Workspace workspace) {
@@ -52,7 +53,8 @@ public class WorkspaceController {
     }
 
     @Operation(summary = "Обновить рабочее место",
-            description = "Обновляет данные рабочего места по его ID")
+            description = "Обновляет данные рабочего места по его ID. "
+                    + "Не принимает связанные сущности в теле запроса.")
     @PutMapping("/{id}")
     public ResponseEntity<Workspace> update(@PathVariable Long id,
                                             @Valid @RequestBody Workspace workspace) {
@@ -60,7 +62,8 @@ public class WorkspaceController {
         return ResponseEntity.ok(updated);
     }
 
-    @Operation(summary = "Удалить рабочее место", description = "Удаляет рабочее место по его ID")
+    @Operation(summary = "Удалить рабочее место", description = "Удаляет рабочее место по его ID. "
+            + "Нельзя удалить рабочее место с существующими бронированиями.")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         workspaceService.deleteWorkspace(id);

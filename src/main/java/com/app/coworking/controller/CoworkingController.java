@@ -17,8 +17,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-
-
 @RestController
 @RequestMapping("/api/coworkings")
 @RequiredArgsConstructor
@@ -43,7 +41,8 @@ public class CoworkingController {
     }
 
     @Operation(summary = "Создать новый коворкинг",
-            description = "Принимает объект коворкинга и сохраняет его в базе")
+            description = "Принимает объект коворкинга и сохраняет его в базе. "
+                    + "Не принимает связанные рабочие места в теле запроса")
     @PostMapping
     public ResponseEntity<Coworking> create(@Valid @RequestBody Coworking coworking) {
         Coworking created = coworkingService.createCoworking(coworking);
@@ -51,7 +50,8 @@ public class CoworkingController {
     }
 
     @Operation(summary = "Обновить коворкинг",
-            description = "Обновляет данные коворкинга по его ID")
+            description = "Обновляет данные коворкинга по его ID."
+                    + " Не принимает связанные рабочие места в теле запроса")
     @PutMapping("/{id}")
     public ResponseEntity<Coworking> update(@PathVariable Long id,
                                             @Valid @RequestBody Coworking coworking) {
@@ -59,7 +59,8 @@ public class CoworkingController {
         return ResponseEntity.ok(updated);
     }
 
-    @Operation(summary = "Удалить коворкинг", description = "Удаляет коворкинг по его ID")
+    @Operation(summary = "Удалить коворкинг", description = "Удаляет коворкинг по его ID. "
+            + "Нельзя удалить коворкинг с существующими рабочими местами.")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         coworkingService.deleteCoworking(id);

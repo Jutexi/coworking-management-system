@@ -2,6 +2,7 @@ package com.app.coworking.service;
 
 import com.app.coworking.cache.WorkspaceCache;
 import com.app.coworking.exception.AlreadyExistsException;
+import com.app.coworking.exception.InvalidArgumentException;
 import com.app.coworking.exception.ResourceNotFoundException;
 import com.app.coworking.model.Coworking;
 import com.app.coworking.model.Workspace;
@@ -47,6 +48,17 @@ public class WorkspaceService {
 
     @Transactional
     public Workspace createWorkspace(Long coworkingId, Workspace workspace) {
+        // Валидация: запрещаем передавать связанные сущности в теле запроса
+        if (workspace.getReservations() != null && !workspace.getReservations().isEmpty()) {
+            throw new InvalidArgumentException(
+                    "Cannot create reservations through workspace creation");
+        }
+
+        if (workspace.getCoworking() != null) {
+            throw new InvalidArgumentException(
+                    "Coworking should be specified through path variable,"
+                    + " not in request body");
+        }
         Coworking coworking = coworkingRepository.findById(coworkingId)
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "Coworking not found with id " + coworkingId));
@@ -65,6 +77,16 @@ public class WorkspaceService {
 
     @Transactional
     public Workspace updateWorkspace(Long id, Workspace updatedWorkspace) {
+        // Валидация: запрещаем изменять связанные сущности через update workspace
+        if (updatedWorkspace.getReservations() != null && !updatedWorkspace.getReservations().isEmpty()) {
+            throw new InvalidArgumentException("Cannot update reservations through workspace update."
+                    + " Use reservation endpoints instead.");
+        }
+
+        if (updatedWorkspace.getCoworking() != null) {
+            throw new InvalidArgumentException("Cannot change coworking through workspace update.");
+        }
+
         Workspace existing = getWorkspaceById(id);
 
         if (!existing.getName().equals(updatedWorkspace.getName())
@@ -73,7 +95,7 @@ public class WorkspaceService {
             throw new AlreadyExistsException(
                     "Workspace with this name already exists in the coworking");
         }
-        //123
+
         existing.setName(updatedWorkspace.getName());
         existing.setDescription(updatedWorkspace.getDescription());
         existing.setType(updatedWorkspace.getType());
@@ -87,6 +109,11 @@ public class WorkspaceService {
     @Transactional
     public void deleteWorkspace(Long id) {
         Workspace existing = getWorkspaceById(id);
+        // Проверяем, есть ли связанные workspace
+        if (existing.getReservations() != null && !existing.getReservations().isEmpty()) {
+            throw new InvalidArgumentException("Cannot delete coworking with existing workspaces."
+                    + " Delete or move workspaces first.");
+        }
         workspaceRepository.delete(existing);
         workspaceCache.remove(id);
     }

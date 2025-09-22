@@ -2,6 +2,7 @@ package com.app.coworking.service;
 
 import com.app.coworking.cache.UserCache;
 import com.app.coworking.exception.AlreadyExistsException;
+import com.app.coworking.exception.InvalidArgumentException;
 import com.app.coworking.exception.ResourceNotFoundException;
 import com.app.coworking.model.User;
 import com.app.coworking.repository.UserRepository;
@@ -41,6 +42,12 @@ public class UserService {
 
     @Transactional
     public User createUser(User user) {
+        if (user.getReservations() != null && !user.getReservations().isEmpty()) {
+            throw new InvalidArgumentException(
+                    "Cannot create reservations through user creation."
+                            + " Use reservation endpoints instead.");
+        }
+
         if (userRepository.existsByEmail(user.getEmail())) {
             throw new AlreadyExistsException("Email is already in use");
         }
@@ -52,6 +59,12 @@ public class UserService {
 
     @Transactional
     public User updateUser(Long id, User updatedUser) {
+
+        if (updatedUser.getReservations() != null && !updatedUser.getReservations().isEmpty()) {
+            throw new InvalidArgumentException(
+                    "Cannot update reservations through user update."
+                            + " Use reservation endpoints instead.");
+        }
         User existing = getUserById(id);
 
         if (!existing.getEmail().equals(updatedUser.getEmail())
@@ -73,6 +86,10 @@ public class UserService {
     @Transactional
     public void deleteUser(Long id) {
         User existing = getUserById(id);
+        if (existing.getReservations() != null && !existing.getReservations().isEmpty()) {
+            throw new InvalidArgumentException("Cannot delete user with existing reservations."
+                    + " Delete reservations first.");
+        }
         userRepository.delete(existing);
         userCache.remove(id);
     }

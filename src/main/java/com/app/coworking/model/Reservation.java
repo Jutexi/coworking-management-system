@@ -1,7 +1,6 @@
 package com.app.coworking.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -14,7 +13,6 @@ import jakarta.persistence.Table;
 import jakarta.validation.constraints.Future;
 import jakarta.validation.constraints.FutureOrPresent;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
 import java.time.LocalDate;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -33,28 +31,15 @@ public class Reservation {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // Связь с Workspace
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "workspace_id", nullable = false)
-    @JsonIgnore
+    @JsonBackReference
     private Workspace workspace;
 
-    // Связь с User
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
-    @JsonIgnore
+    @JsonBackReference
     private User user;
-
-    // Геттеры для JSON
-    @JsonProperty("workspace_id")
-    public Long getWorkspaceId() {
-        return workspace != null ? workspace.getId() : null;
-    }
-
-    @JsonProperty("user_id")
-    public Long getUserId() {
-        return user != null ? user.getId() : null;
-    }
 
     @NotNull(message = "Start date is required")
     @FutureOrPresent(message = "Start date cannot be in the past")
@@ -66,7 +51,6 @@ public class Reservation {
     @Column(name = "end_date", nullable = false)
     private LocalDate endDate;
 
-    @Size(max = 500, message = "Comment cannot exceed 500 characters")
     @Column(columnDefinition = "TEXT")
     private String comment;
 

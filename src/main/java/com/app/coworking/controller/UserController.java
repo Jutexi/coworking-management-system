@@ -42,7 +42,8 @@ public class UserController {
     }
 
     @Operation(summary = "Создать пользователя",
-            description = "Создает нового пользователя с указанными данными")
+            description = "Создает нового пользователя с указанными данными. "
+                    + "Не принимает связанные бронирования в теле запроса")
     @PostMapping
     public ResponseEntity<User> create(@Valid @RequestBody User user) {
         User created = userService.createUser(user);
@@ -50,19 +51,19 @@ public class UserController {
     }
 
     @Operation(summary = "Обновить пользователя",
-            description = "Обновляет данные пользователя по его ID")
+            description = "Обновляет данные пользователя по его ID. "
+                    + "Не принимает связанные рабочие места в теле запроса")
     @PutMapping("/{id}")
     public ResponseEntity<User> update(@PathVariable Long id, @Valid @RequestBody User user) {
         User updated = userService.updateUser(id, user);
         return ResponseEntity.ok(updated);
     }
 
-    @Operation(summary = "Удалить пользователя", description = "Удаляет пользователя по его ID")
+    @Operation(summary = "Удалить пользователя", description = "Удаляет пользователя по его ID. "
+            + "Нельзя удалить пользователя с существующими бронированиями.")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         userService.deleteUser(id);
         return ResponseEntity.noContent().build();
     }
 }
-
-

@@ -55,14 +55,6 @@ public class ReservationService {
         return reservationRepository.findAll();
     }
 
-    @Transactional
-    public List<Reservation> getReservationsByUser(Long userId) {
-        if (!userRepository.existsById(userId)) {
-            throw new ResourceNotFoundException("User not found with id " + userId);
-        }
-        return reservationRepository.findByUserId(userId);
-    }
-
     private void checkAvailability(Workspace workspace,
                                    LocalDate start, LocalDate end, Long excludeReservationId) {
 
@@ -141,13 +133,6 @@ public class ReservationService {
         Reservation saved = reservationRepository.save(existing);
         reservationCache.put(saved.getId(), saved);
         return saved;
-    }
-
-    @Transactional
-    public List<Reservation> createBulkReservations(List<Reservation> reservations) {
-        return reservations.stream()
-                .map(r -> createReservation(r.getWorkspaceId(), r.getUserId(), r))
-                .toList();
     }
 
     @Transactional
