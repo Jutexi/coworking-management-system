@@ -33,12 +33,12 @@ public class Reservation {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "workspace_id", nullable = false)
-    @JsonBackReference
+    @JsonBackReference("workspace-reservation")
     private Workspace workspace;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
-    @JsonBackReference
+    @JsonBackReference("user-reservation")
     private User user;
 
     @NotNull(message = "Start date is required")

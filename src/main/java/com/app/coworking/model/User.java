@@ -64,6 +64,6 @@ public class User {
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL,
             fetch = FetchType.LAZY, orphanRemoval = true)
-    @JsonManagedReference
+    @JsonManagedReference("user-reservation")
     private Set<Reservation> reservations = new HashSet<>();
 }

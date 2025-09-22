@@ -59,11 +59,11 @@ public class Workspace {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "coworking_id", nullable = false)
-    @JsonBackReference
+    @JsonBackReference("coworking-workspace")
     private Coworking coworking;
 
     @OneToMany(mappedBy = "workspace", fetch = FetchType.LAZY,
             cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonManagedReference
+    @JsonManagedReference("workspace-reservation")
     private Set<Reservation> reservations = new HashSet<>();
 }

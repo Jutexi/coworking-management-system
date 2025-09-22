@@ -60,6 +60,6 @@ public class Coworking {
 
     @OneToMany(mappedBy = "coworking", fetch = FetchType.LAZY,
             cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonManagedReference
+    @JsonManagedReference("coworking-workspace")
     private Set<Workspace> workspaces = new HashSet<>();
 }
