@@ -76,6 +76,13 @@ public class WorkspaceService {
     }
 
     @Transactional
+    public List<Workspace> createWorkspacesBulk(Long coworkingId, List<Workspace> workspaces) {
+        return workspaces.stream()
+                .map(workspace -> createWorkspace(coworkingId, workspace)) // Используем существующий createWorkspace
+                .toList();
+    }
+
+    @Transactional
     public Workspace updateWorkspace(Long id, Workspace updatedWorkspace) {
         // Валидация: запрещаем изменять связанные сущности через update workspace
         if (updatedWorkspace.getReservations() != null && !updatedWorkspace.getReservations().isEmpty()) {

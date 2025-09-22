@@ -69,4 +69,14 @@ public class WorkspaceController {
         workspaceService.deleteWorkspace(id);
         return ResponseEntity.noContent().build();
     }
+
+    @Operation(summary = "Массовое создание рабочих мест в коворкинге",
+            description = "Создает несколько рабочих мест в указанном коворкинге.")
+    @PostMapping("/coworking/{coworkingId}/bulk")
+    public ResponseEntity<List<Workspace>> createBulk(
+            @PathVariable Long coworkingId,
+            @Valid @RequestBody List<Workspace> workspaces) {
+        List<Workspace> createdWorkspaces = workspaceService.createWorkspacesBulk(coworkingId, workspaces);
+        return ResponseEntity.status(HttpStatus.CREATED).body(createdWorkspaces);
+    }
 }

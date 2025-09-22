@@ -55,6 +55,25 @@ public class ReservationService {
         return reservationRepository.findAll();
     }
 
+    @Transactional
+    public List<Reservation> getReservationsByUserEmail(String email) {
+        if (!userRepository.existsByEmail(email)) {
+            throw new ResourceNotFoundException("User with email " + email + " not found");
+        }
+        return reservationRepository.findByUserEmail(email);
+    }
+
+    // ReservationService.java
+    @Transactional
+    public List<Reservation> getReservationsByPeriod(LocalDate startDate, LocalDate endDate, Long coworkingId) {
+        // Валидация дат
+        if (endDate.isBefore(startDate)) {
+            throw new InvalidArgumentException("End date must be same or after start date");
+        }
+
+        return reservationRepository.findReservationsByPeriodAndCoworking(startDate, endDate, coworkingId);
+    }
+
     private void checkAvailability(Workspace workspace,
                                    LocalDate start, LocalDate end, Long excludeReservationId) {
 

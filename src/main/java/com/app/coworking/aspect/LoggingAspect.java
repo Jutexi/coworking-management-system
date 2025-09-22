@@ -1,10 +1,12 @@
 package com.app.coworking.aspect;
 
 import java.util.Arrays;
+
+import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.ProceedingJoinPoint;
+import org.aspectj.lang.annotation.AfterThrowing;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
-import org.aspectj.lang.annotation.Pointcut;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -14,23 +16,28 @@ import org.springframework.stereotype.Component;
 public class LoggingAspect {
     private static final Logger logger = LoggerFactory.getLogger(LoggingAspect.class);
 
-    @Pointcut("execution(* com.app.coworking.controller.*.*(..))")
-    public void controllerMethods() {}
-
-    @Around("controllerMethods()")
-    public Object logControllerMethod(ProceedingJoinPoint joinPoint) throws Throwable {
-        String methodName = joinPoint.getSignature().getName();
-        String className = joinPoint.getTarget().getClass().getSimpleName();
-        Object[] args = joinPoint.getArgs();
-
+    @Around("within(com.app.coworking.service..*) || within(com.app.coworking.controller..*)")
+    public Object logAround(ProceedingJoinPoint joinPoint) throws Throwable {
         if (logger.isInfoEnabled()) {
-            logger.info("Controller method {}.{}() called with args: {}",
-                    className, methodName, Arrays.toString(args));
+            logger.info("Entering: {} with arguments = {}",
+                    joinPoint.getSignature().toShortString(),
+                    Arrays.toString(joinPoint.getArgs()));
         }
-
         Object result = joinPoint.proceed();
-        logger.info("Controller method {}.{}() completed successfully",
-                className, methodName);
+        if (logger.isInfoEnabled()) {
+            logger.info("Exiting: {} with result = {}",
+                    joinPoint.getSignature().toShortString(),
+                    result);
+        }
         return result;
+    }
+
+    @AfterThrowing(
+            pointcut =
+                    "within(com.app.coworking.service..*)|| within(com.app.coworking.controller..*)",
+            throwing = "ex")
+    public void logAfterThrowing(JoinPoint joinPoint, Throwable ex) {
+        String methodName = joinPoint.getSignature().toShortString();
+        logger.error("Error in the method: {}, exception: {}\n\t", methodName, ex.getMessage(), ex);
     }
 }

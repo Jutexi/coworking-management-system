@@ -4,18 +4,13 @@ import com.app.coworking.model.Reservation;
 import com.app.coworking.service.ReservationService;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
+
+import java.time.LocalDate;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/reservations")
@@ -65,5 +60,27 @@ public class ReservationController {
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         reservationService.deleteReservation(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @Operation(summary = "Получить бронирования пользователя по email",
+            description = "Возвращает все бронирования пользователя с указанным email")
+    @GetMapping("/user")
+    public ResponseEntity<List<Reservation>> getByUserEmail(@RequestParam String email) {
+        List<Reservation> reservations = reservationService.getReservationsByUserEmail(email);
+        return ResponseEntity.ok(reservations);
+    }
+
+    @Operation(summary = "Получить бронирования по периоду",
+            description = "Возвращает бронирования за указанный период. "
+                    + "Опционально можно указать ID коворкинга для фильтрации")
+    @GetMapping("/filter")
+    public ResponseEntity<List<Reservation>> getByPeriod(
+            @RequestParam LocalDate startDate,
+            @RequestParam LocalDate endDate,
+            @RequestParam(required = false) Long coworkingId) {
+
+        List<Reservation> reservations = reservationService.getReservationsByPeriod(
+                startDate, endDate, coworkingId);
+        return ResponseEntity.ok(reservations);
     }
 }
