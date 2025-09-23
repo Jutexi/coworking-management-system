@@ -67,7 +67,8 @@ public class CoworkingService {
     @Transactional
     public Coworking updateCoworking(Long id, Coworking updatedCoworking) {
 
-        if (updatedCoworking.getWorkspaces() != null && !updatedCoworking.getWorkspaces().isEmpty()) {
+        if (updatedCoworking.getWorkspaces() != null
+                && !updatedCoworking.getWorkspaces().isEmpty()) {
             throw new InvalidArgumentException("Cannot update workspaces through coworking update."
                     + " Use workspace endpoints instead.");
         }

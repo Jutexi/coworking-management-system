@@ -1,7 +1,6 @@
 package com.app.coworking.aspect;
 
 import java.util.Arrays;
-
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.AfterThrowing;
@@ -34,7 +33,8 @@ public class LoggingAspect {
 
     @AfterThrowing(
             pointcut =
-                    "within(com.app.coworking.service..*)|| within(com.app.coworking.controller..*)",
+                    "within(com.app.coworking.service..*)"
+                            + "|| within(com.app.coworking.controller..*)",
             throwing = "ex")
     public void logAfterThrowing(JoinPoint joinPoint, Throwable ex) {
         String methodName = joinPoint.getSignature().toShortString();

@@ -65,13 +65,15 @@ public class ReservationService {
 
     // ReservationService.java
     @Transactional
-    public List<Reservation> getReservationsByPeriod(LocalDate startDate, LocalDate endDate, Long coworkingId) {
+    public List<Reservation> getReservationsByPeriod(
+            LocalDate startDate, LocalDate endDate, Long coworkingId) {
         // Валидация дат
         if (endDate.isBefore(startDate)) {
             throw new InvalidArgumentException("End date must be same or after start date");
         }
 
-        return reservationRepository.findReservationsByPeriodAndCoworking(startDate, endDate, coworkingId);
+        return reservationRepository
+                .findReservationsByPeriodAndCoworking(startDate, endDate, coworkingId);
     }
 
     private void checkAvailability(Workspace workspace,

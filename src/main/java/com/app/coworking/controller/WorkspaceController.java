@@ -76,7 +76,8 @@ public class WorkspaceController {
     public ResponseEntity<List<Workspace>> createBulk(
             @PathVariable Long coworkingId,
             @Valid @RequestBody List<Workspace> workspaces) {
-        List<Workspace> createdWorkspaces = workspaceService.createWorkspacesBulk(coworkingId, workspaces);
+        List<Workspace> createdWorkspaces = workspaceService
+                .createWorkspacesBulk(coworkingId, workspaces);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdWorkspaces);
     }
 }
