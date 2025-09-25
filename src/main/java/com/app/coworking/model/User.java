@@ -60,7 +60,7 @@ public class User {
     @NotNull(message = "Role is required")
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private Role role;
+    private Role role; // USER, ADMIN
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL,
             fetch = FetchType.LAZY, orphanRemoval = true)
