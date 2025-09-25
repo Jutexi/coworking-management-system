@@ -66,6 +66,9 @@ public class LogService {
         try {
             byte[] content = Files.readAllBytes(future.get().toPath());
             return new ByteArrayResource(content);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new LoggingException("File reading was interrupted");
         } catch (Exception e) {
             throw new LoggingException("Error reading generated file");
         }
