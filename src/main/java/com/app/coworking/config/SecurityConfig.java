@@ -5,6 +5,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
@@ -12,15 +14,29 @@ import org.springframework.security.web.SecurityFilterChain;
 public class SecurityConfig {
 
     @Bean
+    public BCryptPasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
+
+    @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                // Отключаем CSRF и стандартную форму входа
+                // Отключаем CSRF для REST API
                 .csrf(AbstractHttpConfigurer::disable)
+
+                // Отключаем сессии (используем JWT)
+                .sessionManagement(session -> session
+                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                )
+
+                // Отключаем стандартную форму входа
                 .formLogin(AbstractHttpConfigurer::disable)
 
-                // Настройка доступа
+                // Настройка доступа к эндпоинтам
                 .authorizeHttpRequests(auth -> auth
-                        .anyRequest().permitAll());
+                        // Все остальные запросы требуют аутентификации
+                        .anyRequest().permitAll()
+                );
 
         return http.build();
     }
