@@ -5,7 +5,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
-import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 
@@ -21,23 +20,13 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                // Отключаем CSRF для REST API
+                // Отключаем CSRF и стандартную форму входа
                 .csrf(AbstractHttpConfigurer::disable)
-
-                // Отключаем сессии (используем JWT)
-                .sessionManagement(session -> session
-                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-                )
-
-                // Отключаем стандартную форму входа
                 .formLogin(AbstractHttpConfigurer::disable)
 
-                // Настройка доступа к эндпоинтам
+                // Настройка доступа
                 .authorizeHttpRequests(auth -> auth
-                        // Все остальные запросы требуют аутентификации
-                        .anyRequest().permitAll()
-                );
-
+                        .anyRequest().permitAll());
 
         return http.build();
     }
