@@ -40,7 +40,10 @@ public class LogService {
             try {
                 Thread.sleep(10000);
                 return createLogFileForDate(date, id);
-            } catch (IOException | InterruptedException e) {
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                throw new LoggingException("Log generation was interrupted");
+            } catch (IOException e) {
                 throw new LoggingException("Error generating log file");
             }
         }));
