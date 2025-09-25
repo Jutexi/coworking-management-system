@@ -144,42 +144,6 @@ class ReservationServiceTest {
     }
 
     @Test
-    void getReservationsByPeriod_WhenValidDates_ShouldReturnReservations() {
-        // Arrange
-        LocalDate startDate = LocalDate.now().plusDays(1);
-        LocalDate endDate = LocalDate.now().plusDays(5);
-        Long coworkingId = 1L;
-
-        Reservation reservation1 = new Reservation();
-        Reservation reservation2 = new Reservation();
-        List<Reservation> expectedList = Arrays.asList(reservation1, reservation2);
-
-        when(reservationRepository.findReservationsByPeriodAndCoworking(startDate, endDate, coworkingId))
-                .thenReturn(expectedList);
-
-        // Act
-        List<Reservation> result = reservationService.getReservationsByPeriod(startDate, endDate, coworkingId);
-
-        // Assert
-        assertEquals(2, result.size());
-        verify(reservationRepository, times(1))
-                .findReservationsByPeriodAndCoworking(startDate, endDate, coworkingId);
-    }
-
-    @Test
-    void getReservationsByPeriod_WhenEndDateBeforeStartDate_ShouldThrowInvalidArgumentException() {
-        // Arrange
-        LocalDate startDate = LocalDate.now().plusDays(5);
-        LocalDate endDate = LocalDate.now().plusDays(1);
-        Long coworkingId = 1L;
-
-        // Act & Assert
-        assertThrows(InvalidArgumentException.class,
-                () -> reservationService.getReservationsByPeriod(startDate, endDate, coworkingId));
-        verify(reservationRepository, never()).findReservationsByPeriodAndCoworking(any(), any(), any());
-    }
-
-    @Test
     void createReservation_WhenValidOpenSpace_ShouldCreateReservation() {
         // Arrange
         Long workspaceId = 1L;
@@ -242,32 +206,6 @@ class ReservationServiceTest {
 
         // Act & Assert
         assertThrows(ResourceNotFoundException.class,
-                () -> reservationService.createReservation(workspaceId, userId, reservation));
-        verify(reservationRepository, never()).save(any());
-    }
-
-    @Test
-    void createReservation_WhenOfficeReservationLessThan7Days_ShouldThrowInvalidArgumentException() {
-        // Arrange
-        Long workspaceId = 1L;
-        Long userId = 1L;
-
-        Workspace workspace = new Workspace();
-        workspace.setId(workspaceId);
-        workspace.setType(WorkspaceType.OFFICE);
-
-        User user = new User();
-        user.setId(userId);
-
-        Reservation reservation = new Reservation();
-        reservation.setStartDate(LocalDate.now().plusDays(1));
-        reservation.setEndDate(LocalDate.now().plusDays(3)); // Всего 3 дня
-
-        when(workspaceRepository.findById(workspaceId)).thenReturn(Optional.of(workspace));
-        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
-
-        // Act & Assert
-        assertThrows(InvalidArgumentException.class,
                 () -> reservationService.createReservation(workspaceId, userId, reservation));
         verify(reservationRepository, never()).save(any());
     }

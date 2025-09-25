@@ -13,7 +13,6 @@ import com.app.coworking.repository.UserRepository;
 import com.app.coworking.repository.WorkspaceRepository;
 import jakarta.transaction.Transactional;
 import java.time.LocalDate;
-import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import org.springframework.stereotype.Service;
@@ -63,34 +62,12 @@ public class ReservationService {
         return reservationRepository.findByUserEmail(email);
     }
 
-    // ReservationService.java
-    @Transactional
-    public List<Reservation> getReservationsByPeriod(
-            LocalDate startDate, LocalDate endDate, Long coworkingId) {
-        // Валидация дат
-        if (endDate.isBefore(startDate)) {
-            throw new InvalidArgumentException("End date must be same or after start date");
-        }
-
-        return reservationRepository
-                .findReservationsByPeriodAndCoworking(startDate, endDate, coworkingId);
-    }
-
     private void checkAvailability(Workspace workspace,
                                    LocalDate start, LocalDate end, Long excludeReservationId) {
 
         // 1) конец не может быть раньше начала (end < start) — равно допустимо (one-day)
         if (end.isBefore(start)) {
             throw new InvalidArgumentException("End date must be same or after start date");
-        }
-
-        // 2) длительность включительно (например, start==end => daysInclusive = 1)
-        long daysInclusive = ChronoUnit.DAYS.between(start, end) + 1;
-
-        // 3) правила по типу workspace
-        if (workspace.getType() == WorkspaceType.OFFICE && daysInclusive < 7) {
-            throw new InvalidArgumentException(
-                    "Office reservations must be at least " + 7 + " days long");
         }
 
         // 4) находим пересекающиеся бронирования
