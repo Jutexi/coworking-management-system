@@ -65,6 +65,14 @@ public class GlobalExceptionHandler { // может все же убрать о�
         return ResponseEntity.badRequest().body(Map.of(ERROR_KEY, ex.getMessage()));
     }
 
+    // Обработчик для LoggingException
+    @ExceptionHandler(LoggingException.class)
+    public ResponseEntity<Map<String, String>> handleLoggingException(LoggingException ex) {
+        logger.error("Logging exception: {}", ex.getMessage(), ex);
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(Map.of(ERROR_KEY, "Logging error: " + ex.getMessage()));
+    }
+
     // Общий fallback на все другие исключения
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Map<String, String>> handleAllExceptions(Exception ex) {
@@ -72,6 +80,8 @@ public class GlobalExceptionHandler { // может все же убрать о�
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(Map.of(ERROR_KEY, "Unexpected error occurred: " + ex.getMessage()));
     }
+
+
 }
 
 

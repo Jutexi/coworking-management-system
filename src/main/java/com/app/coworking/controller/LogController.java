@@ -1,65 +1,65 @@
 package com.app.coworking.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
-import jakarta.validation.constraints.NotNull;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.time.LocalDate;
-import java.util.List;
-import org.springframework.beans.factory.annotation.Value;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import java.util.UUID;
+import com.app.coworking.service.LogService;
 import org.springframework.core.io.Resource;
-import org.springframework.core.io.UrlResource;
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/logs")
+@RequestMapping("api/logs")
+@Tag(name = "Log API", description = "API для синхронной и асинхронной генерации логов")
 public class LogController {
-    @Value("${logging.file.name}")
-    private String logFilePath;
 
-    @Operation(summary = "Get logs by date",
-            description = "Retrieves and saves logs filtered by a specific date")
-    @GetMapping("/by-date")
-    public ResponseEntity<Resource> getLogsByDate(
-            @RequestParam @NotNull(message = "Date is required")
-            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) throws IOException {
+    private final LogService logService;
 
-        String filterDate = date.toString() + "T";  // 2025-09-16T
-        List<String> filteredLogs = Files.readAllLines(Paths.get(logFilePath))
-                .stream()
-                .filter(line -> line.contains(filterDate))
-                .toList();
+    public LogController(LogService logService) {
+        this.logService = logService;
+    }
 
-        if (filteredLogs.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        }
+    @PostMapping("/generate")
+    @Operation(summary = "Асинхронно сгенерировать лог-файл по дате",
+            description = "Запускает задачу по генерации лог-файла. Возвращает UUID задачи.")
+    public ResponseEntity<String> generateLogFile(
+            @Parameter(description = "Дата в формате dd.MM.yyyy", example = "23.04.2025")
+            @RequestParam String date) {
 
-        Path dailyLogsDir = Paths.get("daily-logs");
-        if (!Files.exists(dailyLogsDir)) {
-            Files.createDirectory(dailyLogsDir);
-        }
+        UUID id = logService.generateLogAsync(date);
+        return ResponseEntity.ok(id.toString());
+    }
 
-        String dailyLogFileName = "logs-" + date + ".log";
-        Path dailyLogPath = dailyLogsDir.resolve(dailyLogFileName);
+    @GetMapping("/status/{id}")
+    @Operation(summary = "Проверить статус асинхронной задачи по UUID",
+            description = "Позволяет узнать, завершена ли генерация лог-файла.")
+    public ResponseEntity<String> getStatus(
+            @Parameter(description = "UUID задачи")
+            @PathVariable UUID id) {
 
-        Files.write(dailyLogPath, filteredLogs);
+        return ResponseEntity.ok(logService.getTaskStatus(id));
+    }
 
-        Resource resource = new UrlResource(dailyLogPath.toUri());
+    @GetMapping("/download/{id}")
+    @Operation(summary = "Скачать лог-файл после асинхронной генерации",
+            description = "Возвращает готовый лог-файл по UUID задачи.")
+    public ResponseEntity<Resource> downloadGeneratedFile(
+            @Parameter(description = "UUID задачи")
+            @PathVariable UUID id) {
 
+        Resource resource = logService.getGeneratedFile(id);
         return ResponseEntity.ok()
                 .contentType(MediaType.APPLICATION_OCTET_STREAM)
                 .header(HttpHeaders.CONTENT_DISPOSITION,
-                        "attachment; filename=\"" + resource.getFilename() + "\"")
+                        "attachment; filename=\"log-" + id + ".log\"")
                 .body(resource);
     }
 }
