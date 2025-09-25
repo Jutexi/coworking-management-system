@@ -50,7 +50,7 @@ public class AuthController {
 
     @Operation(summary = "Войти в существующий аккаунт")
     @PostMapping("/login")
-    public ResponseEntity<?> loginUser(@RequestBody LoginRequest loginRequest) {
+    public ResponseEntity<Map<String, Object>> loginUser(@RequestBody LoginRequest loginRequest) {
         User user = userRepository.findByEmail(loginRequest.email)
                 .orElseThrow(() ->
                         new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User not found"));
